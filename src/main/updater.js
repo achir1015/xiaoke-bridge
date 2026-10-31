@@ -154,8 +154,15 @@ class Updater {
       return { quitting: true };
     }
     if (f === 'portable') {
-      const target = path.join(path.dirname(process.env.PORTABLE_EXECUTABLE_FILE), path.basename(file));
-      await copyWithRetry(file, target);
+      // 原本的資料夾可能被移動、刪除或不能寫入（隨身碟拔掉、唯讀位置）：改放到「下載」
+      let target = path.join(path.dirname(process.env.PORTABLE_EXECUTABLE_FILE), path.basename(file));
+      try {
+        await copyWithRetry(file, target);
+      } catch (e) {
+        if (!['ENOENT', 'EPERM', 'EACCES', 'EROFS'].includes(e.code)) throw e;
+        target = path.join(app.getPath('downloads'), path.basename(file));
+        await copyWithRetry(file, target);
+      }
       await launchWithRetry(target, []);
       setTimeout(() => app.quit(), 400);
       return { quitting: true, path: target };

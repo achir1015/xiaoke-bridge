@@ -1,7 +1,7 @@
 {
   "name": "xiaoke-bridge",
   "productName": "小柯機器人橋牌競賽",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "小柯機器人橋牌競賽：3D 合約橋牌（真人對 AI、AI 對 AI、遠端真人＋語音、AI 軍師代打、雙明手速算牌譜庫、動畫語音教學、背景音樂、自動更新）",
   "main": "src/main/main.js",
   "author": {
