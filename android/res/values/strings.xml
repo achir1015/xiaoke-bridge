@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">小柯橋牌</string>
+    <style name="AppTheme" parent="android:Theme.Material.NoActionBar">
+        <item name="android:colorPrimary">#0F2A1F</item>
+        <item name="android:colorPrimaryDark">#08130E</item>
+        <item name="android:colorAccent">#E8C060</item>
+        <item name="android:statusBarColor">#08130E</item>
+        <item name="android:navigationBarColor">#08130E</item>
+        <item name="android:windowBackground">@android:color/black</item>
+    </style>
+</resources>

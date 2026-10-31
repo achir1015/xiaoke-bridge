@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>小柯機器人橋牌競賽</title>
+<link rel="icon" href="ios/icon-180.png">
+<link rel="apple-touch-icon" href="ios/icon-180.png">
+<style>
+  :root { --bg: #0d1a1f; --card: #14262c; --fg: #f3efe2; --dim: #b9c7bd; --gold: #e8c46a; --red: #c8302b; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: radial-gradient(circle at 50% 0, #1f5a3c, var(--bg) 70%); color: var(--fg); font: 17px/1.6 -apple-system, "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", sans-serif; min-height: 100vh; }
+  main { max-width: 760px; margin: 0 auto; padding: 28px 16px 56px; }
+  .head { display: flex; align-items: center; gap: 18px; }
+  img.icon { width: 96px; height: 96px; border-radius: 22px; box-shadow: 0 8px 24px rgba(0,0,0,.45); flex: none; }
+  h1 { margin: 0; font-size: 28px; }
+  .sub { color: var(--dim); margin: 4px 0 0; }
+  a.play { display: block; margin-top: 26px; padding: 22px 16px; border-radius: 14px; background: var(--red); color: #fff; font-size: 26px; font-weight: 700; text-decoration: none; text-align: center; box-shadow: 0 4px 0 #8c1f1b; }
+  a.play:active { transform: translateY(2px); box-shadow: 0 2px 0 #8c1f1b; }
+  .note { color: var(--dim); font-size: 15px; text-align: center; margin: 10px 0 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 28px; }
+  .grid a { display: block; padding: 14px 16px; background: var(--card); border-radius: 12px; color: var(--fg); text-decoration: none; border: 1px solid #2f4f58; }
+  .grid a:hover { border-color: var(--gold); }
+  .grid b { display: block; color: var(--gold); }
+  .grid span { color: var(--dim); font-size: 14px; }
+  .card { margin-top: 28px; padding: 18px 20px; background: var(--card); border-radius: 14px; }
+  .card h2 { margin: 0 0 8px; font-size: 18px; color: var(--gold); }
+  ul { margin: 0; padding-left: 1.3em; }
+  li { margin: 4px 0; }
+  footer { margin-top: 34px; color: var(--dim); font-size: 14px; text-align: center; }
+</style>
+</head>
+<body>
+<main>
+  <div class="head">
+    <img class="icon" src="ios/icon-512.png" alt="小柯橋牌圖示">
+    <div><h1>小柯機器人橋牌競賽</h1><p class="sub" id="ver">3D 合約橋牌．BEN 神經網路．雙明手速算．動畫語音教學</p></div>
+  </div>
+
+  <a class="play" href="online/">▶ 立即線上玩</a>
+  <p class="note">不用安裝，電腦、平板、手機的瀏覽器都能玩（建議 Chrome、Edge 或 Safari）。</p>
+
+  <div class="grid">
+    <a id="dl-win" href="https://github.com/achir1015/xiaoke-bridge/releases/latest"><b>Windows 11</b><span>安裝版</span></a>
+    <a id="dl-mac" href="https://github.com/achir1015/xiaoke-bridge/releases/latest"><b>MacBook Pro</b><span>Apple 晶片／Intel</span></a>
+    <a id="dl-apk" href="https://github.com/achir1015/xiaoke-bridge/releases/latest"><b>Android 手機</b><span>APK 安裝檔</span></a>
+    <a href="ios/"><b>iPad／iPhone</b><span>用 Safari 開，按一下安裝</span></a>
+  </div>
+
+  <div class="card">
+    <h2>線上版怎麼用</h2>
+    <ul>
+      <li>線上版和 App 用同一套 AI：叫牌是 BEN 神經網路，打牌是抽樣＋雙明手，都在您的瀏覽器裡計算。</li>
+      <li>牌譜、設定和自己加的音樂都存在這台裝置的瀏覽器裡；換裝置可以用牌譜庫的「匯出／匯入 PBN」搬過去。</li>
+      <li>遠端對賽用房號連線，線上版、電腦版、手機版彼此都能一起打。</li>
+      <li>Chrome／Edge 可以按網址列的「安裝」，iPhone／iPad 的 Safari 可以「加入主畫面」。</li>
+    </ul>
+  </div>
+  <footer>遊戲開發：吳玉柱 先生 與 Claude AI Opus 5.5</footer>
+</main>
+<script>
+  // 下載按鈕直接連到最新版的安裝檔（查不到就留在 Release 頁）
+  fetch('https://api.github.com/repos/achir1015/xiaoke-bridge/releases/latest').then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+    if (!j) return;
+    document.getElementById('ver').textContent = '最新版本 ' + j.tag_name + '．3D 合約橋牌．BEN 神經網路．雙明手速算';
+    var find = function (re) { return (j.assets || []).filter(function (a) { return re.test(a.name); })[0]; };
+    var set = function (id, a) { if (a) document.getElementById(id).href = a.browser_download_url; };
+    set('dl-win', find(/win-x64\.exe$/));
+    set('dl-apk', find(/android\.apk$/));
+    // Mac 分 Apple 晶片／Intel，網頁分不出來，留在 Release 頁讓使用者選
+  }).catch(function () {});
+</script>
+</body>
+</html>

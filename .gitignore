@@ -1,0 +1,13 @@
+node_modules/
+dist/
+e2e/out/
+__pycache__/
+*.log
+dist-test/
+mobile/www/
+android/build/
+android/*.jks
+android/local.properties
+ios/web/
+ios/*.xcodeproj/
+ios/build/

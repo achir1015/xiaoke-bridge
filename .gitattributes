@@ -1,0 +1,6 @@
+ios/*.sh text eol=lf
+ios/*.py text eol=lf
+ios/*.yml text eol=lf
+*.onnx binary
+*.mp3 binary
+*.png binary

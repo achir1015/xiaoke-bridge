@@ -1,0 +1,41 @@
+name: 線上版與安裝頁（GitHub Pages）
+
+on:
+  push:
+    branches: [main]
+    paths: ['package.json', 'src/**', 'assets/**', 'docs/**', 'mobile/**', 'scripts/build-mobile.mjs', '.github/workflows/pages.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm ci --ignore-scripts
+      # 網站：docs/（首頁、iPad／iPhone 安裝頁）＋ online/（線上版，和手機版同一份網頁）
+      - name: 組合網站
+        run: |
+          node scripts/build-mobile.mjs
+          mkdir -p _site
+          cp -r docs/. _site/
+          cp -r mobile/www _site/online
+          touch _site/.nojekyll
+          du -sh _site
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: _site }
+      - id: deploy
+        uses: actions/deploy-pages@v4

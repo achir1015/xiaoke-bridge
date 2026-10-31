@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'sha256-5xY7jflTAlHffw31YtTHdjSdKmm2Ra05XuGOgpvwYYY='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' app: blob: mediastream:; connect-src 'self' https: wss: ws: http: data: blob:; worker-src 'self' blob:">
+<title>小柯機器人橋牌競賽</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="mobile.css">
+<script type="importmap">{"imports":{"three":"../../node_modules/three/build/three.module.js","three/addons/controls/":"./vendor/"}}</script>
+<script src="../../node_modules/peerjs/dist/peerjs.min.js"></script>
+<script src="js/xk-mobile.js"></script>
+<script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <!-- 首頁 -->
+  <section id="scr-home" class="screen on">
+    <div id="homeBody" class="home"></div>
+  </section>
+
+  <!-- 牌桌 -->
+  <section id="scr-game" class="screen">
+    <header class="topbar">
+      <button id="btnHome" class="ghost" title="回首頁">⟵ 首頁</button>
+      <div class="banner-wrap">
+        <div id="clock" class="clock"></div>
+        <div id="turnBanner" class="turn-banner">—</div>
+      </div>
+      <div class="top-right">
+        <div class="viewgroup">
+          <button id="viewTilt" class="viewbtn on" title="斜角視角">斜視</button>
+          <button id="viewTop" class="viewbtn" title="正上方俯視">俯視</button>
+          <button id="viewLow" class="viewbtn" title="低角度立體">立體</button>
+        </div>
+        <div class="volbox" title="音效音量">
+          <button id="btnSfx" class="ghost vol-icon">🔔</button>
+          <input id="sfxVol" class="vslider" type="range" min="0" max="100">
+        </div>
+        <button id="btnDrawer" class="ghost mobile-only drawer-btn" title="軍師、聊天、紀錄、音樂">☰</button>
+        <div class="volbox" title="背景音樂音量">
+          <button id="miniMusic" class="ghost vol-icon">♫</button>
+          <input id="musicVol" class="vslider" type="range" min="0" max="100">
+        </div>
+      </div>
+    </header>
+    <div class="game-body">
+      <main id="boardWrap" class="board-wrap">
+        <div id="board" class="board"></div>
+        <div id="seats"></div>
+        <div id="infoBox" class="info-box"></div>
+        <div id="auction" class="auction"></div>
+        <div id="bidBox" class="bid-box hidden"></div>
+        <div id="tableBtns" class="table-btns">
+          <button id="btnHint">💡 提示</button>
+          <button id="btnProxy" class="play-only">🧙 軍師接手</button>
+          <button id="btnChangeAdv" class="play-only">🔄 換軍師</button>
+          <button id="btnFast" class="play-only">⏩ 快轉打完</button>
+          <button id="btnPause" class="aivai-only">⏸ 暫停</button>
+          <button id="btnNext" class="primary hidden">下一副 ▶</button>
+        </div>
+        <div id="replayBar" class="replay-bar replay-only">
+          <button id="rpStart" title="回到開頭">⏮</button>
+          <button id="rpPrev" title="上一步（←）">◀</button>
+          <button id="rpPlay" title="自動播放">▶ 播放</button>
+          <button id="rpNext" title="下一步（→）">▶▶</button>
+          <button id="rpAna" title="雙明手逐張分析">🔍 逐張分析</button>
+          <span id="rpInfo" class="muted small"></span>
+        </div>
+        <div class="board-tip muted small">點一下牌就出牌．右鍵拖曳旋轉．滾輪縮放</div>
+      </main>
+      <div id="drawerShade" class="drawer-shade"></div>
+      <aside class="right">
+        <nav class="tabs">
+          <button class="tab on" data-tab="advisor">🧙 軍師</button>
+          <button class="tab net-only" data-tab="chat">💬 聊天</button>
+          <button class="tab" data-tab="log">📋 紀錄</button>
+          <button class="tab" data-tab="music">♫ 音樂</button>
+        </nav>
+        <div id="pane-advisor" class="tabpane on"><div id="advisorPanel" class="advisor"></div></div>
+        <div id="pane-chat" class="tabpane">
+          <div id="voiceBar" class="voicebar">
+            <span id="voiceState">語音：未通話</span>
+            <button id="btnVoice" class="primary">🎤 加入語音</button>
+            <button id="btnMute" class="hidden">🔇 靜音</button>
+          </div>
+          <div id="memberList" class="members"></div>
+          <div id="chatLog" class="chatlog"></div>
+          <div class="chatsend"><input id="chatInput" placeholder="輸入訊息，Enter 送出" maxlength="500"><button id="chatSend">送出</button></div>
+          <div id="remoteAudios" class="hidden"></div>
+        </div>
+        <div id="pane-log" class="tabpane">
+          <div id="scoreBox" class="score-box"></div>
+          <div id="eventLog" class="event-log"></div>
+        </div>
+        <div id="pane-music" class="tabpane"><div id="musicPanel" class="music"></div></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- 牌譜庫 -->
+  <section id="scr-kb" class="screen">
+    <div id="kbBody" class="records"></div>
+  </section>
+
+  <!-- 教學與說明 -->
+  <section id="scr-guide" class="screen">
+    <div id="guideBody" class="guide"></div>
+  </section>
+</body>
+</html>

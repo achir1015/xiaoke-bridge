@@ -1,0 +1,115 @@
+{
+  "name": "xiaoke-bridge",
+  "productName": "小柯機器人橋牌競賽",
+  "version": "1.0.0",
+  "description": "小柯機器人橋牌競賽：3D 合約橋牌（真人對 AI、AI 對 AI、遠端真人＋語音、AI 軍師代打、雙明手速算牌譜庫、動畫語音教學、背景音樂、自動更新）",
+  "main": "src/main/main.js",
+  "author": {
+    "name": "吳玉柱",
+    "email": "achir1015@gmail.com"
+  },
+  "license": "GPL-3.0-or-later",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test test/",
+    "e2e": "node e2e/smoke.mjs && node e2e/guide-voice.mjs",
+    "music": "python scripts/gen_music.py",
+    "icon": "python scripts/make_icon.py",
+    "portraits": "node scripts/gen_portraits.mjs",
+    "dist:win": "electron-builder --win nsis portable --x64 --publish never",
+    "dist:mac": "electron-builder --mac dmg --publish never",
+    "mobile": "node scripts/build-mobile.mjs",
+    "android": "python android/build.py"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.3.0",
+    "onnxruntime-web": "1.20.1",
+    "peerjs": "1.5.5",
+    "three": "0.170.0"
+  },
+  "build": {
+    "appId": "com.achir.xiaokebridge",
+    "productName": "小柯機器人橋牌競賽",
+    "artifactName": "XiaokeBridge-${version}-${os}-${arch}.${ext}",
+    "copyright": "Copyright © 2026 吳玉柱",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "!assets/portraits/_sheet.html",
+      "build/icon.png",
+      "package.json",
+      "LICENSE",
+      "NOTICE.md",
+      "node_modules/**/*",
+      "!node_modules/three/examples/**",
+      "!node_modules/three/src/**",
+      "!node_modules/onnxruntime-web/lib/**",
+      "!node_modules/onnxruntime-web/dist/ort.bundle*",
+      "!node_modules/onnxruntime-web/dist/ort.webgl*",
+      "!node_modules/onnxruntime-web/dist/ort.webgpu*",
+      "!node_modules/onnxruntime-web/dist/ort.all*",
+      "!node_modules/onnxruntime-web/dist/ort.node*",
+      "!node_modules/onnxruntime-web/dist/ort.min*",
+      "!node_modules/onnxruntime-web/dist/ort.js",
+      "!node_modules/onnxruntime-web/dist/ort.mjs",
+      "!node_modules/onnxruntime-web/dist/ort.wasm.js",
+      "!node_modules/onnxruntime-web/dist/ort.wasm.mjs",
+      "!node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.jsep*",
+      "!node_modules/**/test/**",
+      "!node_modules/**/*.map",
+      "!node_modules/**/*.d.ts",
+      "!node_modules/**/*.d.mts",
+      "!mobile/**",
+      "!android/**"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico",
+      "executableName": "XiaokeBridge"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "小柯機器人橋牌競賽",
+      "uninstallDisplayName": "小柯機器人橋牌競賽",
+      "language": "1028",
+      "installerLanguages": [
+        "zh_TW"
+      ]
+    },
+    "portable": {
+      "artifactName": "XiaokeBridge-${version}-win-x64-portable.${ext}"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "build/icon.png",
+      "category": "public.app-category.board-games",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "extendInfo": {
+        "NSMicrophoneUsageDescription": "與遠端牌友語音通話需要使用麥克風。"
+      },
+      "identity": "-"
+    },
+    "dmg": {
+      "title": "小柯機器人橋牌競賽 ${version}"
+    },
+    "npmRebuild": false
+  },
+  "devDependencies": {
+    "electron": "^33.4.11",
+    "electron-builder": "^25.1.8",
+    "esbuild": "^0.24.2",
+    "peer": "^1.0.2",
+    "playwright-core": "^1.48.2"
+  }
+}
