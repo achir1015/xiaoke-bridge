@@ -157,7 +157,7 @@ export const SYS_LESSONS = [
   {
     id: 's-sys', title: '音樂與更新', steps: [
       { say: '內建 20 首背景音樂。上方的直立滑桿可以調音樂和音效的大小聲，往上是大聲。音樂分頁可以選歌，也能加入自己的音樂。', show: text('♫ 背景音樂 20 首') },
-      { say: '首頁的「關於與更新」可以檢查新版本，有新版會自動下載安裝。', show: text('ℹ 關於與更新') },
+      { say: '首頁的「關於與更新」可以檢查新版本。電腦版與 Android 會下載並安裝；iPad、iPhone 會打開 GitHub 安裝頁，按一下就更新；線上版重新載入網頁就好。', show: { t: 'kv', rows: [['Windows、Mac', '下載並安裝'], ['Android', '下載 APK 安裝'], ['iPad、iPhone', 'GitHub 安裝頁'], ['線上版', '重新載入']] } },
     ],
   },
 ];

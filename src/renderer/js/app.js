@@ -1546,8 +1546,13 @@ async function checkUpdate(manual, statusEl) {
 }
 
 async function startUpdate(info) {
+  if (info.flavor === 'web') {
+    if (await modal('線上版有新版本', h('p', {}, `要重新載入網頁更新到 v${info.latest} 嗎？牌譜和設定都會保留。`), [{ label: '稍後', value: false }, { label: '重新載入', value: true, primary: true }])) location.reload();
+    return;
+  }
   if (!info.canInstall) {
-    const v = await modal('下載新版本', h('p', {}, info.flavor === 'dev' ? '目前是開發版，請到 GitHub 下載安裝檔。' : '找不到這個平台的安裝檔，請到 GitHub 下載。'), [{ label: '取消', value: false }, { label: '開啟下載頁', value: true, primary: true }]);
+    const text = info.flavor === 'dev' ? '目前是開發版，請到 GitHub 下載安裝檔。' : info.flavor === 'ios' ? '會用 Safari 開啟 GitHub 安裝頁，按「安裝到這台 iPad／iPhone」就會更新（限開發者登記過的裝置）。' : '找不到這個平台的安裝檔，請到 GitHub 下載。';
+    const v = await modal('下載新版本', h('p', {}, text), [{ label: '取消', value: false }, { label: info.flavor === 'ios' ? '開啟安裝頁' : '開啟下載頁', value: true, primary: true }]);
     if (v) xk.update.openPage();
     return;
   }

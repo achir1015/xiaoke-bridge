@@ -155,6 +155,7 @@
   // ---------------- 版本更新 ----------------
   var progressFns = [];
   var updInfo = null;
+  var REPO = 'achir1015/xiaoke-bridge';
   var IOS_INSTALL_PAGE = 'https://achir1015.github.io/xiaoke-bridge/ios/';
   function cmpVer(a, b) {
     var pa = String(a).replace(/^v/, '').split('.').map(Number), pb = String(b).replace(/^v/, '').split('.').map(Number);
@@ -174,16 +175,34 @@
         }, 0);
       });
     }
-    return fetch('https://api.github.com/repos/achir1015/xiaoke-bridge/releases/latest').then(function (r) {
+    var done = function (latest, notes, page, ipa) {
+      updInfo = { current: cur, latest: latest, newer: cmpVer(latest, cur) > 0, notes: notes || '', page: isIOS ? IOS_INSTALL_PAGE : page,
+        asset: ipa ? { name: ipa.name, url: ipa.browser_download_url, size: ipa.size } : null, flavor: isIOS ? 'ios' : 'web', canInstall: false };
+      return updInfo;
+    };
+    // 線上版：網站上的 version.json 就是最新版，重新載入就更新了
+    if (!isIOS) {
+      return fetch('version.json', { cache: 'no-store' }).then(function (r) {
+        if (!r.ok) throw new Error('查詢失敗（' + r.status + '）');
+        return r.json();
+      }).then(function (j) { return done(String(j.version || cur), '', location.href, null); });
+    }
+    return fetch('https://api.github.com/repos/' + REPO + '/releases/latest').then(function (r) {
       if (!r.ok) throw new Error('查詢失敗（' + r.status + '）');
       return r.json();
     }).then(function (j) {
-      var latest = String(j.tag_name || '').replace(/^v/, '');
-      // iPhone／iPad：Release 裡有 .ipa 就改開 GitHub Pages 的安裝頁（itms-services 線上安裝）
-      var ipa = isIOS && (j.assets || []).filter(function (a) { return /\.ipa$/i.test(a.name); })[0];
-      updInfo = { current: cur, latest: latest, newer: cmpVer(latest, cur) > 0, notes: String(j.body || '').slice(0, 4000), page: ipa ? IOS_INSTALL_PAGE : j.html_url,
-        asset: ipa ? { name: ipa.name, url: ipa.browser_download_url, size: ipa.size } : null, flavor: isIOS ? 'ios' : 'web', canInstall: false };
-      return updInfo;
+      return done(String(j.tag_name || '').replace(/^v/, ''), String(j.body || '').slice(0, 4000), j.html_url,
+        (j.assets || []).filter(function (a) { return /\.ipa$/i.test(a.name); })[0]);
+    }).catch(function (err) {
+      // GitHub API 每個網路每小時只能查 60 次；被限制時改讀安裝頁的 manifest.plist（裡面有 iPad／iPhone 版的版本號）
+      return fetch(IOS_INSTALL_PAGE + 'manifest.plist', { cache: 'no-store' }).then(function (r) {
+        if (!r.ok) throw err;
+        return r.text();
+      }).then(function (t) {
+        var m = /<key>bundle-version<\/key>\s*<string>([^<]+)<\/string>/.exec(t);
+        if (!m) throw err;
+        return done(m[1], '', 'https://github.com/' + REPO + '/releases/latest', null);
+      }).catch(function () { throw err; });
     });
   }
   function downloadUpdate() {
