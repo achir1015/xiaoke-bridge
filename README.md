@@ -1,4 +1,8 @@
 # 小柯機器人橋牌競賽
+<img width="1870" height="869" alt="image" src="https://github.com/user-attachments/assets/7bf0c11c-9298-40d0-bc6c-18437f35e060" />
+示範
+
+https://github.com/user-attachments/assets/e5d3af16-6d2b-4d0d-aa6b-43a164bceb0d
 
 3D 合約橋牌。遊戲開發：吳玉柱 先生 與 Claude AI Opus 5.5
 
