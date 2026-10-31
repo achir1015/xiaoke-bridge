@@ -88,7 +88,7 @@ async function playBoard(no, { bidMode = 'hint', shots = false } = {}) {
       n++;
       await sleep(60);
     } else await sleep(120);
-    if (Date.now() - t0 > 240000) throw new Error('打牌逾時');
+    if (Date.now() - t0 > 240000) { console.log(JSON.stringify(st), await win.evaluate(() => JSON.stringify({ q: window.__xkb.pool.queue.length, busy: window.__xkb.pool.workers.filter((w) => w.job).length, token: window.__xkb.aiToken, proxy: window.__xkb.proxy, ctrl: window.__xkb.view?.ctrl }))); throw new Error('打牌逾時'); }
   }
 }
 

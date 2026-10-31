@@ -1,6 +1,8 @@
 // 主執行緒上的 AI 引擎代理：一個神經網路 Worker＋多個雙明手 Worker
 import { parOf } from './dds.js';
 
+const GRACE_MS = 1200; // 已經在算的工作多給一點時間
+
 export class NNProxy {
   constructor() {
     this.w = new Worker(new URL('./nn.worker.js', import.meta.url), { type: 'module' });
@@ -57,21 +59,22 @@ export class DDPool {
     }
   }
 
-  run(op, a, deadline = 0, front = false) {
+  // deadline：還沒開始的工作到期直接回 null；已開始的由 Worker 在 stop 時間放棄，一樣回 null
+  run(op, a, deadline = 0, front = false, stop = deadline) {
     return new Promise((resolve, reject) => {
-      const job = { op, a, deadline, resolve, reject };
+      const job = { op, a: stop ? { ...a, deadline: stop } : a, deadline, resolve, reject };
       if (front) this.queue.unshift(job); else this.queue.push(job);
       this.pump();
     });
   }
 
-  // 到期還沒開始的工作回傳 null（已經開始的算完才回來）
-  moves(tasks, { deadline = 0 } = {}) { return Promise.all(tasks.map((t) => this.run('moves', t, deadline, true).catch(() => null))); }
-  final(tasks, { deadline = 0 } = {}) { return Promise.all(tasks.map((t) => this.run('final', t, deadline, true).catch(() => null))); }
-  // 整桌雙明手：五門分給不同核心同時算
-  async table(deal, vul, dealer) {
-    const table = await Promise.all([0, 1, 2, 3, 4].map((st) => this.run('row', { deal, st })));
-    return { table, par: parOf(table, vul, dealer) };
+  moves(tasks, { deadline = 0 } = {}) { return Promise.all(tasks.map((t) => this.run('moves', t, deadline, true, deadline && deadline + GRACE_MS).catch(() => null))); }
+  final(tasks, { deadline = 0 } = {}) { return Promise.all(tasks.map((t) => this.run('final', t, deadline, true, deadline && deadline + GRACE_MS).catch(() => null))); }
+  // 整桌雙明手：五門分給不同核心同時算；超過 limitMs 回傳 null
+  async table(deal, vul, dealer, limitMs = 60000) {
+    const stop = Date.now() + limitMs;
+    const table = await Promise.all([0, 1, 2, 3, 4].map((st) => this.run('row', { deal, st }, 0, false, stop)));
+    return table.some((r) => !r) ? null : { table, par: parOf(table, vul, dealer) };
   }
   close() { for (const x of this.workers) x.w.terminate(); this.queue = []; }
 }

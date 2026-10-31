@@ -498,7 +498,7 @@ async function onBoardOver() {
   // 速算：整桌雙明手與 Par
   let dd = null;
   // 極難算的牌不能拖住比賽：超過時限先顯示結果，之後可在牌譜庫補算
-  try { dd = await Promise.race([S.pool.table(b.deal, b.vul, b.dealer), sleep(DD_LIMIT_MS).then(() => null)]); } catch (e) { console.warn(e); }
+  try { dd = await S.pool.table(b.deal, b.vul, b.dealer, DD_LIMIT_MS); } catch (e) { console.warn(e); }
   const par = dd ? dd.par.score : null;
   const rec = S.match.record(b, par);
   if (dd) { rec.dd = dd.table; rec.parC = dd.par.contract; }
@@ -895,8 +895,9 @@ async function fastFinish() {
   if (!(await modal('快轉打完', '雙方都用雙明手最佳打法打完這一副，直接看結果？', [{ label: '取消', value: false }, { label: '快轉', value: true, primary: true }]))) return;
   if (b.phase !== 'play' || b.trick.length) return;
   S.aiToken++;
-  const t = await S.pool.final([{ deal: b.hands, trump: STRAIN_TO_SUIT[b.contract.strain], leader: b.turn }]);
-  const ev = b.claimRest(b.turn, t[0] ?? 0);
+  const t = await S.pool.final([{ deal: b.hands, trump: STRAIN_TO_SUIT[b.contract.strain], leader: b.turn }], { deadline: Date.now() + 20000 });
+  if (t[0] == null) { toast('這副牌太複雜，算不出來，請繼續打完', 'err'); schedule(); return; }
+  const ev = b.claimRest(b.turn, t[0]);
   applyEvents(ev);
   schedule();
 }
@@ -1412,7 +1413,8 @@ async function batchAnalyze() {
     const g = games.get(b.m);
     const rec = g && g.history.find((r) => r.no === b.no);
     if (!rec) return;
-    const dd = await S.pool.table(rec.deal, rec.vul, rec.dealer);
+    const dd = await S.pool.table(rec.deal, rec.vul, rec.dealer, 90000);
+    if (!dd) return;
     rec.dd = dd.table; rec.par = dd.par.score; rec.parC = dd.par.contract;
     rec.imp = rec.result ? imps(rec.result.nsScore - rec.par) : null;
     Object.assign(b, { dd: rec.dd, par: rec.par, parC: rec.parC, imp: rec.imp });
@@ -1494,7 +1496,7 @@ async function analyzeReplay() {
     meta.push({ seat: b.turn, card, no: b.tricks.length + 1 });
     b.act(b.controller(), { t: 'play', card });
   }
-  const res = await S.pool.moves(tasks);
+  const res = await S.pool.moves(tasks, { deadline: Date.now() + 60000 });
   log.innerHTML = '';
   let lostNS = 0, lostEW = 0;
   res.forEach((r, i) => {

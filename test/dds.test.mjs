@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Solver, toMasks, ddTable, parOf } from '../src/renderer/js/dds.js';
+import { Solver, toMasks, ddTable, parOf, ABORT } from '../src/renderer/js/dds.js';
 import { rng, dealCards, suitOf, rankOf } from '../src/renderer/js/rules.js';
 
 // 參考解：純 alpha-beta，完全不用置換表，用來驗證解算器
@@ -107,4 +107,14 @@ test('Par：一方能做 3NT 時為該方得分', () => {
   const p = parOf(table, 0);
   assert.equal(p.score, 400);
   assert.match(p.contract, /3N 南北/);
+});
+
+test('逾時會中斷，之後同一個解算器仍然正確', () => {
+  const s = new Solver(16, 12);
+  const m = toMasks(dealCards(2));
+  s.deadline = Date.now() - 1;
+  assert.throws(() => { for (let i = 0; i < 3; i++) { s.clear(); s.solve(m, 0, 1); } }, (e) => e === ABORT);
+  s.deadline = 0;
+  const a = s.solve(m, 0, 1);
+  assert.equal(a, new Solver().solve(m, 0, 1));
 });

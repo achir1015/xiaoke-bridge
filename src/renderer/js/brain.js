@@ -235,11 +235,21 @@ export class Brain {
       const wt = e.w || 1;
       return { card: x, util: e.u / wt, tricks: st.won[turnSide] + e.t / wt, make: e.make / wt, prior: prior ? (prior.find((p) => p.card === x) || {}).p || 0 : 0 };
     });
-    if (!table.some((t) => stat.get(t.card).w > 0)) return { card: prior ? prior[0].card : legal[legal.length - 1], table: null };
+    if (!table.some((t) => stat.get(t.card).w > 0)) return { card: prior ? prior[0].card : this._fallback(legal, st), table: null };
     // 同分時：跟牌出小；領牌優先長門與大牌連張
     const pick = (t) => t.util + (prior ? t.prior * 2 : 0) - this._tieBreak(t.card, st) * 0.001 + (lv.cardNoise ? (this.r() - 0.5) * lv.cardNoise : 0);
     const sorted = [...table].sort((a, b) => pick(b) - pick(a));
     return { card: sorted[0].card, table: [...table].sort((a, b) => b.util - a.util), samples: res.filter(Boolean).length };
+  }
+
+  // 時限內一個抽樣都沒算完：領牌出最大、跟牌能贏就用最小的贏、不然出最小
+  _fallback(legal, st) {
+    const byRank = [...legal].sort((a, b) => rankOf(a) - rankOf(b));
+    if (!st.trick.length) return byRank[0];
+    const lead = suitOf(st.trick[0].card);
+    const best = Math.min(...st.trick.filter((t) => suitOf(t.card) === lead).map((t) => rankOf(t.card)));
+    const win = byRank.filter((c) => suitOf(c) === lead && rankOf(c) < best);
+    return win.length ? win[win.length - 1] : byRank[byRank.length - 1];
   }
 
   _tieBreak(card, st) {

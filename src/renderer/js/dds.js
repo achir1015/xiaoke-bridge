@@ -46,6 +46,7 @@ function sortMoves(a, b, n) {
 }
 
 const NONE = 13; // 這個花色沒有任何點位有影響
+export const ABORT = new Error('解算逾時'); // 極難的牌可能算好幾分鐘，超過時限就放棄，不能讓比賽停住
 const PLIES = 60;
 
 export class Solver {
@@ -73,6 +74,8 @@ export class Solver {
     this.bestLead = new Int16Array(1 << 20).fill(-1);
     this.maxSide = 0;
     this.trump = -1;
+    this.deadline = 0; // 0＝不限時
+    this.tick = 0;
   }
 
   clear() { this.head.fill(0); this.top = 1; }
@@ -87,6 +90,7 @@ export class Solver {
   solve(handMasks, trump, leader, guess = -1) {
     this._setTrump(trump);
     this.load(handMasks);
+    this.tm.fill(0);
     this.trump = trump;
     this.nodes = 0;
     let n = 0;
@@ -118,6 +122,7 @@ export class Solver {
     R[rb] = R[rb + 1] = R[rb + 2] = R[rb + 3] = NONE;
     if (target <= 0) return true;
     if (target > n) return false;
+    if ((++this.tick & 0xfff) === 0 && this.deadline && Date.now() > this.deadline) throw ABORT;
     const maxMoves = (leader & 1) === this.maxSide;
 
     // 快速贏墩
@@ -356,6 +361,7 @@ export class Solver {
   solveMoves(handMasks, trump, turn, played, only = null) {
     this._setTrump(trump);
     this.load(handMasks);
+    this.tm.fill(0);
     this.trump = trump;
     const h = this.h, cur = this.cur, base = turn * 4;
     const pos = played.length;
